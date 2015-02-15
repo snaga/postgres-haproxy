@@ -1,0 +1,28 @@
+#!/bin/sh
+
+PORT=5432
+
+# pid              | 22133
+# usesysid         | 10
+# usename          | snaga
+# application_name | prod2
+# client_addr      | 127.0.0.1
+# client_hostname  |
+# client_port      | 40214
+# backend_start    | 2015-02-11 17:15:44.459425+09
+# backend_xmin     |
+# state            | streaming
+# sent_location    | 0/5000060
+# write_location   | 0/5000060
+# flush_location   | 0/5000060
+# replay_location  | 0/5000060
+# sync_priority    | 2
+# sync_state       | sync
+
+while [ 1 ]; do
+    D=`date`
+    echo "****** $D ******";
+    psql -p $PORT -c "select null as pid,null as name,null as addr,null as port,'local' as state,pg_current_xlog_insert_location() as sent,pg_current_xlog_location() as write,null as flush,null as replay,null as pri,'master' as mode union all select pid,application_name as name,client_addr as addr,client_port as port,state,sent_location as sent,write_location as write,flush_location as flush,replay_location as reply,sync_priority as pri,sync_state as mode from pg_stat_replication" postgres | grep -v rows\);
+    sleep 3;
+done
+

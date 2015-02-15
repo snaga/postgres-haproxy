@@ -1,0 +1,24 @@
+#!/bin/sh
+
+PORTS="5432 5433 5434 5435"
+DBNAME=postgres
+
+while [ 1 ]; do
+    D=`date`
+    echo "****** $D ******";
+    header=0
+    for p in $PORTS; do
+	if [ $header -eq 0 ]; then
+	    psql -p $p -c "select '$p' as port,datname,numbackends,xact_commit,xact_rollback from pg_stat_database where datname = current_database()" $DBNAME | grep '|\|-';
+	    if [ $? -ne 0 ]; then
+		continue;
+	    fi
+	    header=1
+	else
+	    psql -p $p -c "select '$p' as port,datname,numbackends,xact_commit,xact_rollback from pg_stat_database where datname = current_database()" $DBNAME | grep $DBNAME;
+	fi
+    done;
+    echo
+    sleep 3;
+done
+
